@@ -207,6 +207,8 @@ def run_program():
     if username:
         password = input("Kijiji password: ")
 
+    pbullet = input("PushBullet api key (leave empty to not include): ")
+
     details = OrderedDict()
     for attrKey, attrVal in category_map.items():
         if attrKey != 'category':
@@ -231,6 +233,8 @@ def run_program():
     if username and password:
         details['username'] = username
         details['password'] = password
+    if pbullet:
+        details['pbullet_key'] = pbullet
 
     f = open(ad_file_name, 'w')
     f.write(yaml.dump(details))
