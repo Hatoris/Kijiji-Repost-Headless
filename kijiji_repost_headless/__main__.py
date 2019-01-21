@@ -7,6 +7,7 @@ import yaml
 
 import generate_post_file as generator
 import kijiji_api
+import pbullet
 
 if sys.version_info < (3, 0):
     raise Exception("This program requires Python 3.0 or greater")
@@ -76,7 +77,7 @@ def get_post_details(ad_file, api=None):
     return [data, files]
 
 
-def post_ad(args, api=None):
+def post_ad(args, api=None, body=None):
     """
     Post new ad
     """
@@ -93,6 +94,11 @@ def post_ad(args, api=None):
             api = kijiji_api.KijijiApi()
             api.login(args.username, args.password)
         api.post_ad_using_data(data, image_files)
+        if not body:
+            body = ["Sucessfully posted ad !"]
+        else:
+            body.append("Sucessfully posted ad !")
+        pbullet.pbullet(data, body)
     if not check_ad(args):
         print("Failed ad post attempt #{}, giving up.".format(attempts))
 
@@ -125,6 +131,8 @@ def delete_ad(args, api=None):
     api.delete_ad(args.id)
 
 
+
+
 def repost_ad(args, api=None):
     """
     Repost ad
@@ -144,15 +152,15 @@ def repost_ad(args, api=None):
             del_ad_name = data[item]
     try:
         api.delete_ad_using_title(del_ad_name)
-        print("Existing ad deleted before reposting")
+        deleted = "Existing ad deleted before reposting"
     except kijiji_api.KijijiApiException:
-        print("Did not find an existing ad with matching title, skipping ad deletion")
+        deleted = "Did not find an existing ad with matching title, skipping ad deletion"
         pass
-
+    print(deleted)
     # Must wait a bit before posting the same ad even after deleting it, otherwise Kijiji will automatically remove it
     print("Waiting 3 minutes before posting again. Please do not exit this script.")
     sleep(180)
-    post_ad(args)
+    post_ad(args, body=[deleted])
 
 
 def check_ad(args, api=None):
