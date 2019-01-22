@@ -119,24 +119,26 @@ class KijijiApi:
         """
         Delete ad based on ad ID
         """
-        my_ads_page = self.session.get('https://www.kijiji.ca/m-my-ads.html')
-        params = {
-            'Action': 'DELETE_ADS',
-            'Mode': 'ACTIVE',
-            'needsRedirect': 'false',
-            'ads': '[{{"adId":"{}","reason":"PREFER_NOT_TO_SAY","otherReason":""}}]'.format(ad_id),
-            'ca.kijiji.xsrf.token': get_xsrf_token(my_ads_page.text),
-        }
-        resp = self.session.post('https://www.kijiji.ca/j-delete-ad.json', data=params)
-        if "OK" not in resp.text:
-            raise KijijiApiException("Could not delete ad.", resp.text)
+        if ad_id:
+            my_ads_page = self.session.get('https://www.kijiji.ca/m-my-ads.html')
+            params = {
+                'Action': 'DELETE_ADS',
+                'Mode': 'ACTIVE',
+                'needsRedirect': 'false',
+                'ads': '[{{"adId":"{}","reason":"PREFER_NOT_TO_SAY","otherReason":""}}]'.format(ad_id),
+                'ca.kijiji.xsrf.token': get_xsrf_token(my_ads_page.text),
+            }
+            resp = self.session.post('https://www.kijiji.ca/j-delete-ad.json', data=params)
+            if "OK" not in resp.text:
+                raise KijijiApiException("Could not delete ad.", resp.text)
 
     def delete_ad_using_title(self, title):
         """
         Delete ad based on ad title
         """
         all_ads = self.get_all_ads()
-        [self.delete_ad(ad['id']) for ad in all_ads if ad['title'].strip() == title.strip()]
+        self.delete_ad(self.get_ads_id_with_higher_similarity(title, all_ads))
+        #[self.delete_ad(ad['id']) for ad in all_ads if ad['title'].strip() == title.strip()]
 
     def upload_image(self, token, image_files=[]):
         """
@@ -231,3 +233,21 @@ class KijijiApi:
                 ads_info[ad_id]['rank'] = rank
 
         return [ad for ad in ads_info.values()]
+
+    def get_jaccard_sim(self, str1, str2): 
+        a = set(str1.split()) 
+        b = set(str2.split())
+        c = a.intersection(b)
+        return float(len(c)) / (len(a) + len(b) - len(c))
+
+    def get_ads_id_with_higher_similarity(self, title, all_ads):
+        ad_id = None
+        score = 0
+        for ad in all_ads:
+            tmp = self.get_jaccard_sim(title.strip(), ad["title"].strip())
+            if tmp > score:
+                ad_id = ad['id']
+                score = tmp
+            else:
+                continue
+        return ad_id
