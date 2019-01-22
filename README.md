@@ -30,6 +30,8 @@ Repost one ad (item.yml); will delete the ad prior to posting if it already exis
 
 `python kijiji_repost_headless [-u USERNAME] [-p PASSWORD] repost myproduct/item.yml`
 
+Ad will be deleted by looking similarity in title.
+
 Show all active ads:
 
 `python kijiji_repost_headless [-u USERNAME] [-p PASSWORD] show`
@@ -41,6 +43,10 @@ Delete all ads:
 Delete one ad (using ad id):
 
 `python kijiji_repost_headless [-u USERNAME] [-p PASSWORD] delete myAdId`
+
+### PushBullet notification
+
+When creating an add with `build_ad` option you will be ask to enter you pushbullet api key. If provide, a notification will be send when you `post` or `repost` your ads.
 
 ## Project Structure
 
