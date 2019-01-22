@@ -137,7 +137,7 @@ class KijijiApi:
         Delete ad based on ad title
         """
         all_ads = self.get_all_ads()
-        self.delete_ad(self.get_ads_id_with_higher_similarity(title, all_ads))
+        self.delete_ad(self.get_ad_id_with_higher_similarity(title, all_ads))
         #[self.delete_ad(ad['id']) for ad in all_ads if ad['title'].strip() == title.strip()]
 
     def upload_image(self, token, image_files=[]):
@@ -240,7 +240,7 @@ class KijijiApi:
         c = a.intersection(b)
         return float(len(c)) / (len(a) + len(b) - len(c))
 
-    def get_ads_id_with_higher_similarity(self, title, all_ads):
+    def get_ad_id_with_higher_similarity(self, title, all_ads):
         ad_id = None
         score = 0
         for ad in all_ads:
